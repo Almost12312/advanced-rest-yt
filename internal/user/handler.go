@@ -2,6 +2,7 @@ package user
 
 import (
 	"advanced-rest-yt/internal/http/handlers"
+	"advanced-rest-yt/pkg/logging"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -15,10 +16,11 @@ const (
 var _ handlers.Handler = &handler{}
 
 type handler struct {
+	logger *logging.Logger
 }
 
-func NewHandler() handlers.Handler {
-	return &handler{}
+func NewHandler(logger *logging.Logger) handlers.Handler {
+	return &handler{logger: logger}
 }
 
 func (h *handler) Register(r *httprouter.Router) {
