@@ -1,0 +1,48 @@
+POST http://localhost:1234/users
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 201, "User creating is failure!")
+    })
+%}
+
+###
+
+PUT http://localhost:1234/users/13
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 204, "User updating is failure!")
+    })
+%}
+###
+
+PATCH http://localhost:1234/users/13
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 204, "User parcticiall update is failure!")
+    })
+%}
+###
+
+DELETE http://localhost:1234/users/13
+Content-Type: application/json
+
+{}
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 204, "User delete is failure!")
+    })
+%}
+###
+###
