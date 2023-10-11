@@ -1,8 +1,10 @@
 package user
 
 import (
+	"advanced-rest-yt/internal/apperror"
 	"advanced-rest-yt/internal/http/handlers"
 	"advanced-rest-yt/pkg/logging"
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -24,44 +26,49 @@ func NewHandler(logger *logging.Logger) handlers.Handler {
 }
 
 func (h *handler) Register(r *httprouter.Router) {
-	r.HandlerFunc("GET", usersUrl, h.GetList)
-	r.GET(userUrl, h.UserByUuid)
+	r.HandlerFunc("GET", usersUrl, apperror.Middleware(h.GetList))
+	r.HandlerFunc("GET", userUrl, apperror.Middleware(h.UserByUuid))
 
-	r.POST(userCreateUrl, h.Create)
+	r.HandlerFunc("POST", userCreateUrl, apperror.Middleware(h.Create))
 
-	r.PUT(userUrl, h.Update)
-	r.PATCH(userUrl, h.ParticiallUpdate)
+	r.HandlerFunc("PUT", userUrl, apperror.Middleware(h.Update))
+	r.HandlerFunc("PATCH", userUrl, apperror.Middleware(h.ParticiallUpdate))
 
-	r.DELETE(userUrl, h.Delete)
+	r.HandlerFunc("DELETE", userUrl, apperror.Middleware(h.Delete))
 }
 
-func (h *handler) GetList(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("nothing"))
-	w.WriteHeader(200)
+func (h *handler) GetList(w http.ResponseWriter, r *http.Request) error {
+	return apperror.ErrNotFound
 }
 
-func (h *handler) UserByUuid(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	w.WriteHeader(200)
-	w.Write([]byte("this is UserByUuid"))
-
+func (h *handler) UserByUuid(w http.ResponseWriter, r *http.Request) error {
+	return fmt.Errorf("api err")
 }
 
-func (h *handler) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) Create(w http.ResponseWriter, r *http.Request) error {
 	w.WriteHeader(201)
 	w.Write([]byte("this is Create"))
+	return nil
+
 }
 
-func (h *handler) Update(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) Update(w http.ResponseWriter, r *http.Request) error {
 	w.WriteHeader(204)
 	w.Write([]byte("this is Update"))
+	return nil
+
 }
 
-func (h *handler) ParticiallUpdate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) ParticiallUpdate(w http.ResponseWriter, r *http.Request) error {
 	w.WriteHeader(204)
 	w.Write([]byte("this is ParticiallUpdate"))
+	return nil
+
 }
 
-func (h *handler) Delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	w.WriteHeader(204)
 	w.Write([]byte("this is Delete"))
+	return nil
+
 }

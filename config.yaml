@@ -1,6 +1,15 @@
 env: local
 
 listen:
-  type: sock
+  type: socket
   bind_ip: 0.0.0.0
   port: 10000
+
+mongodb:
+  host: localhost
+  port: 27017
+  collection: users
+  database: user-service
+  authDB: admin
+  username:
+  password:
