@@ -17,7 +17,7 @@ func (e AppError) Error() string {
 	return e.Msg
 }
 
-func (e AppError) Wrap() error {
+func (e AppError) Unwrap() error {
 	return e.Err
 }
 
@@ -40,5 +40,5 @@ func NewAppError(error error, msg, devMsg, code string) *AppError {
 }
 
 func systemError(err error) *AppError {
-	return NewAppError(err, "interbal system error", err.Error(), "US-000000")
+	return NewAppError(err, "internal system error", err.Error(), "US-000000")
 }

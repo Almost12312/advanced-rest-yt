@@ -11,7 +11,33 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:1234/users/13
+GET http://localhost:1234/users
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 418, "User creating is failure!")
+    })
+%}
+
+###
+
+GET http://localhost:1234/users/1
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 418, "User creating is failure!")
+    })
+%}
+
+###
+
+PUT http://localhost:1234/users/1
 Content-Type: application/json
 
 {}
@@ -35,7 +61,7 @@ Content-Type: application/json
 %}
 ###
 
-DELETE http://localhost:1234/users/13
+DELETE http://localhost:1234/users/1
 Content-Type: application/json
 
 {}

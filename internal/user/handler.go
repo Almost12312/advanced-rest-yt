@@ -26,15 +26,17 @@ func NewHandler(logger *logging.Logger) handlers.Handler {
 }
 
 func (h *handler) Register(r *httprouter.Router) {
-	r.HandlerFunc("GET", usersUrl, apperror.Middleware(h.GetList))
-	r.HandlerFunc("GET", userUrl, apperror.Middleware(h.UserByUuid))
+	apperror.SetMiddlewareLogger(h.logger)
 
-	r.HandlerFunc("POST", userCreateUrl, apperror.Middleware(h.Create))
+	r.HandlerFunc(http.MethodGet, usersUrl, apperror.Middleware(h.GetList))
+	r.HandlerFunc(http.MethodGet, userUrl, apperror.Middleware(h.UserByUuid))
 
-	r.HandlerFunc("PUT", userUrl, apperror.Middleware(h.Update))
-	r.HandlerFunc("PATCH", userUrl, apperror.Middleware(h.ParticiallUpdate))
+	r.HandlerFunc(http.MethodPost, userCreateUrl, apperror.Middleware(h.Create))
 
-	r.HandlerFunc("DELETE", userUrl, apperror.Middleware(h.Delete))
+	r.HandlerFunc(http.MethodPut, userUrl, apperror.Middleware(h.Update))
+	r.HandlerFunc(http.MethodPatch, userUrl, apperror.Middleware(h.ParticiallUpdate))
+
+	r.HandlerFunc(http.MethodDelete, userUrl, apperror.Middleware(h.Delete))
 }
 
 func (h *handler) GetList(w http.ResponseWriter, r *http.Request) error {
@@ -67,8 +69,5 @@ func (h *handler) ParticiallUpdate(w http.ResponseWriter, r *http.Request) error
 }
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) error {
-	w.WriteHeader(204)
-	w.Write([]byte("this is Delete"))
-	return nil
-
+	return apperror.NewAppError(nil, "test", "test", "US-000005")
 }
