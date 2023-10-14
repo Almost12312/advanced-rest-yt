@@ -4,11 +4,19 @@ listen:
   type: port
   port: 1234
 
-mongodb:
-  host: localhost
-  port: 27017
-  collection: users
-  database: user-service
-  authDB: admin
-  username:
-  password:
+storage:
+  postgres:
+    host: localhost
+    port: 27017
+    database: user-service
+    username:
+    password:
+
+  mongodb:
+    host: localhost
+    port: 27017
+    collection: users
+    database: user-service
+    authDB: admin
+    username:
+    password:

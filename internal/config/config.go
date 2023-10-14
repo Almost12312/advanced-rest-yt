@@ -7,15 +7,28 @@ import (
 )
 
 type Config struct {
-	Env     string `yaml:"env" env-required:"true"`
-	Listen  listen `yaml:"listen" env-required:"true"`
-	MongoDB MongoDB
+	Env     string  `yaml:"env" env-required:"true"`
+	Listen  listen  `yaml:"listen" env-required:"true"`
+	Storage Storage `yaml:"storage"`
 }
 
 type listen struct {
 	Type   string `yaml:"type"`
 	BindIp string `yaml:"bind_ip"`
 	Port   string `yaml:"port"`
+}
+
+type Storage struct {
+	MongoDB    MongoDB
+	PostgreSQL PostgreSQL
+}
+
+type PostgreSQL struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Database string `json:"database"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type MongoDB struct {

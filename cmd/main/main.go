@@ -42,19 +42,19 @@ func main() {
 
 	database, err := mongodb.NewClient(
 		ctx,
-		cfg.MongoDB.Host,
-		cfg.MongoDB.Port,
-		cfg.MongoDB.Username,
-		cfg.MongoDB.Password,
-		cfg.MongoDB.Database,
-		cfg.MongoDB.AuthDB,
+		cfg.Storage.MongoDB.Host,
+		cfg.Storage.MongoDB.Port,
+		cfg.Storage.MongoDB.Username,
+		cfg.Storage.MongoDB.Password,
+		cfg.Storage.MongoDB.Database,
+		cfg.Storage.MongoDB.AuthDB,
 		logger,
 	)
 	if err != nil {
 		logger.Fatalf("cant create client, error: %v", err)
 	}
 
-	storage := db.NewStorage(database, cfg.MongoDB.Collection, logger)
+	storage := db.NewStorage(database, cfg.Storage.MongoDB.Collection, logger)
 
 	testDatabase(ctx, storage, logger)
 
@@ -84,12 +84,12 @@ func testDatabase(ctx context.Context, storage user.Storage, logger *logging.Log
 	}
 	logger.Infof("user was updated")
 
-	t, _ := context.WithTimeout(ctx, time.Second*1)
-	err = storage.Delete(t, foundedUser.ID)
-	_ = storage.Delete(t, "652699222e181c4337fe888a")
-	if err != nil {
-		panic(err)
-	}
+	//t, _ := context.WithTimeout(ctx, time.Second*1)
+	//err = storage.Delete(t, foundedUser.ID)
+	//_ = storage.Delete(t, "652699222e181c4337fe888a")
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	res, err := storage.FindAll(ctx)
 	if err != nil {
