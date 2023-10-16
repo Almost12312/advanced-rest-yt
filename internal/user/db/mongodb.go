@@ -17,7 +17,7 @@ type db struct {
 	logger     *logging.Logger
 }
 
-func NewStorage(database *mongo.Database, collectionName string, logger *logging.Logger) user.Storage {
+func NewStorage(database *mongo.Database, collectionName string, logger *logging.Logger) user.Repository {
 	return &db{
 		collection: database.Collection(collectionName),
 		logger:     logger,

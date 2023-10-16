@@ -64,7 +64,7 @@ func main() {
 	start(router, logger, cfg)
 }
 
-func testDatabase(ctx context.Context, storage user.Storage, logger *logging.Logger) {
+func testDatabase(ctx context.Context, storage user.Repository, logger *logging.Logger) {
 	id, err := storage.Create(ctx, *createTestUser())
 	if err != nil {
 		panic(err)

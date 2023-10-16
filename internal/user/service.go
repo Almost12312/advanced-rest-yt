@@ -6,7 +6,7 @@ import (
 )
 
 type Service struct {
-	Storage Storage
+	Storage Repository
 	Logger  *logging.Logger
 }
 

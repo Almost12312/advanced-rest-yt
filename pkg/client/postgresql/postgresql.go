@@ -1,7 +1,7 @@
 package postgresql
 
 import (
-	"advanced-rest-yt/pkg/utils"
+	"advanced-rest-yt/pkg/repeatable"
 	"context"
 	"fmt"
 	"github.com/jackc/pgconn"
@@ -27,7 +27,7 @@ type Client interface {
 func NewClient(ctx context.Context, maxAttempts uint, username, password, host, port, db string) (pool *pgxpool.Pool, err error) {
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, db)
 
-	err = utils.DoWithAttempts(func() error {
+	err = repeatable.DoWithAttempts(func() error {
 		ctxTimeout, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelFunc()
 
