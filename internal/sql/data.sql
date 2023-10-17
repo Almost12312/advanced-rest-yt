@@ -13,7 +13,7 @@ create table public.book
 );
 
 INSERT INTO public.author (name)
-values ('Dmitry');
+values ('Danil');
 
 INSERT INTO public.author (name)
 values ('Anytolies');

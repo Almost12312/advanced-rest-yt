@@ -5,6 +5,7 @@ import (
 	"advanced-rest-yt/pkg/client/postgresql"
 	"advanced-rest-yt/pkg/logging"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/jackc/pgconn"
 	"strings"
@@ -27,7 +28,9 @@ func (r *repository) Create(ctx context.Context, author *author.Author) (string,
 	r.logger.Tracef("Sql query: %s", qFormat)
 
 	if err := r.client.QueryRow(ctx, q, author.Name).Scan(&author.ID); err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
+		var pgErr *pgconn.PgError
+		if errors.Is(err, pgErr) {
+			err = err.(*pgconn.PgError)
 			errMsg := fmt.Sprintf("sql error: %s. Code: %s, Detail: %s. Where: %s", pgErr.Message, pgErr.Code, pgErr.Detail, pgErr.Where)
 			r.logger.Error(errMsg)
 		}
