@@ -19,16 +19,17 @@ type listen struct {
 }
 
 type Storage struct {
-	MongoDB    MongoDB
-	PostgreSQL PostgreSQL
+	MongoDB    MongoDB    `json:"mongodb" yaml:"mongodb"`
+	PostgreSQL PostgreSQL `json:"postgresql" yaml:"postgres"`
 }
 
 type PostgreSQL struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Database string `json:"database"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	PreHost  string `json:"prehost" yaml:"pre_host"`
+	Host     string `json:"host" yaml:"host"`
+	Port     string `json:"port" yaml:"port"`
+	Database string `json:"database" yaml:"database"`
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
 }
 
 type MongoDB struct {

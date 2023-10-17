@@ -1,6 +1,8 @@
 package postgresql
 
 import (
+	"advanced-rest-yt/internal/config"
+	"advanced-rest-yt/pkg/logging"
 	"advanced-rest-yt/pkg/repeatable"
 	"context"
 	"fmt"
@@ -24,22 +26,27 @@ type Client interface {
 }
 
 // TODO: logger
-func NewClient(ctx context.Context, maxAttempts uint, username, password, host, port, db string) (pool *pgxpool.Pool, err error) {
-	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, db)
+func NewClient(ctx context.Context, maxAttempts uint, cfg config.PostgreSQL, logger *logging.Logger) (pool *pgxpool.Pool, err error) {
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
+	if cfg.PreHost != "" {
+		dsn = fmt.Sprintf("%s:%s", cfg.PreHost, dsn)
+	}
 
 	err = repeatable.DoWithAttempts(func() error {
-		ctxTimeout, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
+		ctxTimeout, cancelFunc := context.WithTimeout(ctx, 2*time.Second)
 		defer cancelFunc()
 
 		pxpool, err := pgxpool.Connect(ctxTimeout, dsn)
 		if err != nil {
+			msg := fmt.Sprintf("Cant connect to Postgres, err: %s", err)
+			logger.Errorf(msg)
 			fmt.Println("Cant connect to postgres")
-			return nil
+			return err
 		}
 		pool = pxpool
 
-		return nil
-	}, maxAttempts, 5*time.Second)
+		return err
+	}, maxAttempts, 2*time.Second)
 
 	if err != nil {
 		log.Fatalf("postgress cant connect, %s", err)

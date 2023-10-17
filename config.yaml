@@ -7,10 +7,10 @@ listen:
 storage:
   postgres:
     host: localhost
-    port: 27017
-    database: user-service
-    username:
-    password:
+    port: 5432
+    database: postgres
+    username: postgres
+    password: we13
 
   mongodb:
     host: localhost

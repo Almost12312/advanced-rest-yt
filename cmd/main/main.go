@@ -1,14 +1,17 @@
 package main
 
 import (
+	"advanced-rest-yt/internal/author"
+	authRepo "advanced-rest-yt/internal/author/db"
 	"advanced-rest-yt/internal/config"
-	"advanced-rest-yt/internal/user/db"
-	"advanced-rest-yt/pkg/client/mongodb"
+	"advanced-rest-yt/pkg/client/postgresql"
 	"advanced-rest-yt/pkg/logging"
+	"advanced-rest-yt/pkg/strs"
 	"context"
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"os"
@@ -40,58 +43,100 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	database, err := mongodb.NewClient(
-		ctx,
-		cfg.Storage.MongoDB.Host,
-		cfg.Storage.MongoDB.Port,
-		cfg.Storage.MongoDB.Username,
-		cfg.Storage.MongoDB.Password,
-		cfg.Storage.MongoDB.Database,
-		cfg.Storage.MongoDB.AuthDB,
-		logger,
-	)
+	//database, err := mongodb.NewClient(
+	//	ctx,
+	//	cfg.Storage.MongoDB.Host,
+	//	cfg.Storage.MongoDB.Port,
+	//	cfg.Storage.MongoDB.Username,
+	//	cfg.Storage.MongoDB.Password,
+	//	cfg.Storage.MongoDB.Database,
+	//	cfg.Storage.MongoDB.AuthDB,
+	//	logger,
+	//)
+	//if err != nil {
+	//	logger.Fatalf("cant create client, error: %v", err)
+	//}
+
+	//mongo := db.NewStorage(database, cfg.Storage.MongoDB.Collection, logger)
+	postgres, err := postgresql.NewClient(ctx, 3, cfg.Storage.PostgreSQL, logger)
 	if err != nil {
-		logger.Fatalf("cant create client, error: %v", err)
+		logger.Fatalf("cant create postgres client: %s", err)
 	}
 
-	storage := db.NewStorage(database, cfg.Storage.MongoDB.Collection, logger)
+	repository := authRepo.NewRepository(postgres, logger)
 
-	testDatabase(ctx, storage, logger)
+	//testMongoDB(ctx, mongo, logger)
+	testPostgreSQL(ctx, repository, logger)
 
-	userHandler := user.NewHandler(logger)
-	userHandler.Register(router)
+	//userHandler := user.NewHandler(logger)
+	//userHandler.Register(router)
 
 	start(router, logger, cfg)
 }
 
-func testDatabase(ctx context.Context, storage user.Repository, logger *logging.Logger) {
-	id, err := storage.Create(ctx, *createTestUser())
+func testPostgreSQL(ctx context.Context, repo author.Repository, logger *logging.Logger) {
+	authors, err := repo.FindAll(ctx)
+	if err != nil {
+		logger.Fatalf("%s", err)
+	}
+
+	for _, a := range authors {
+		logger.Infof("%s", a)
+	}
+
+	a, err := repo.FindOne(ctx, "cb7f6f2b-8663-467f-9c80-d3ea364be7ef")
+	if err != nil {
+		logger.Errorf("Cant test FindOne(), err: %s", err)
+	}
+
+	logger.Debugf("Author is: %s", a)
+
+	ath := &author.Author{
+		Name: strs.RandomString(int8(rand.Intn(127))),
+	}
+
+	id, err := repo.Create(ctx, ath)
+	if err != nil {
+		logger.Errorf("Cant test Create(), err: %s", err)
+	}
+
+	_ = id
+
+	//err = repo.Delete(ctx, id)
+	//if err != nil {
+	//	logger.Errorf("Cant test Delete(), err: %s", err)
+	//
+	//}
+}
+
+func testMongoDB(ctx context.Context, mongo user.Repository, logger *logging.Logger) {
+	id, err := mongo.Create(ctx, *createTestUser())
 	if err != nil {
 		panic(err)
 	}
 	logger.Infof("created user, id: %s", id)
 
-	foundedUser, err := storage.FindOne(ctx, id)
+	foundedUser, err := mongo.FindOne(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	logger.Infof("finded user is: %v", foundedUser)
 
 	foundedUser.Username = "bibki!"
-	err = storage.Update(ctx, foundedUser)
+	err = mongo.Update(ctx, foundedUser)
 	if err != nil {
 		panic(err)
 	}
 	logger.Infof("user was updated")
 
 	//t, _ := context.WithTimeout(ctx, time.Second*1)
-	//err = storage.Delete(t, foundedUser.ID)
-	//_ = storage.Delete(t, "652699222e181c4337fe888a")
+	//err = mongo.Delete(t, foundedUser.ID)
+	//_ = mongo.Delete(t, "652699222e181c4337fe888a")
 	//if err != nil {
 	//	panic(err)
 	//}
 
-	res, err := storage.FindAll(ctx)
+	res, err := mongo.FindAll(ctx)
 	if err != nil {
 		panic(err)
 	}
