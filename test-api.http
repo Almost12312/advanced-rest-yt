@@ -71,4 +71,14 @@ Content-Type: application/json
     })
 %}
 ###
-###
+
+#authors
+GET http://localhost:1234/authors
+Content-Type: application/json
+
+{}
+> {%
+    client.test("List of users", () => {
+        client.assert(response.status === 200, "User delete is failure!")
+    })
+%}

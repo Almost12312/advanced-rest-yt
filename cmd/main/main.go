@@ -63,13 +63,18 @@ func main() {
 		logger.Fatalf("cant create postgres client: %s", err)
 	}
 
-	repository := authRepo.NewRepository(postgres, logger)
+	authRepository := authRepo.NewRepository(postgres, logger)
 
 	//testMongoDB(ctx, mongo, logger)
-	testPostgreSQL(ctx, repository, logger)
+	testPostgreSQL(ctx, authRepository, logger)
 
-	//userHandler := user.NewHandler(logger)
-	//userHandler.Register(router)
+	logger.Info("start creating handlers")
+	userHandler := user.NewHandler(logger)
+	userHandler.Register(router)
+
+	authorHandler := author.NewHandler(logger, authRepository)
+	authorHandler.Register(router)
+	logger.Info("end creating handlers")
 
 	start(router, logger, cfg)
 }
