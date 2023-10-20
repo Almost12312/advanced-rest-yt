@@ -3,6 +3,8 @@ package main
 import (
 	"advanced-rest-yt/internal/author"
 	authRepo "advanced-rest-yt/internal/author/db"
+	bookDB "advanced-rest-yt/internal/book"
+	book "advanced-rest-yt/internal/book/db"
 	"advanced-rest-yt/internal/config"
 	"advanced-rest-yt/pkg/client/postgresql"
 	"advanced-rest-yt/pkg/logging"
@@ -64,9 +66,9 @@ func main() {
 	}
 
 	authRepository := authRepo.NewRepository(postgres, logger)
-
+	bookRepository := book.NewRepository(postgres, logger)
 	//testMongoDB(ctx, mongo, logger)
-	testPostgreSQL(ctx, authRepository, logger)
+	testPostgreSQL(ctx, logger, authRepository, bookRepository)
 
 	logger.Info("start creating handlers")
 	userHandler := user.NewHandler(logger)
@@ -79,8 +81,8 @@ func main() {
 	start(router, logger, cfg)
 }
 
-func testPostgreSQL(ctx context.Context, repo author.Repository, logger *logging.Logger) {
-	authors, err := repo.FindAll(ctx)
+func testPostgreSQL(ctx context.Context, logger *logging.Logger, authRepo author.Repository, bookRepo bookDB.Repository) {
+	authors, err := authRepo.FindAll(ctx)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
@@ -89,7 +91,7 @@ func testPostgreSQL(ctx context.Context, repo author.Repository, logger *logging
 		logger.Infof("%s", a)
 	}
 
-	a, err := repo.FindOne(ctx, "cb7f6f2b-8663-467f-9c80-d3ea364be7ef")
+	a, err := authRepo.FindOne(ctx, "cb7f6f2b-8663-467f-9c80-d3ea364be7ef")
 	if err != nil {
 		logger.Errorf("Cant test FindOne(), err: %s", err)
 	}
@@ -100,18 +102,19 @@ func testPostgreSQL(ctx context.Context, repo author.Repository, logger *logging
 		Name: strs.RandomString(int8(rand.Intn(127))),
 	}
 
-	id, err := repo.Create(ctx, ath)
+	id, err := authRepo.Create(ctx, ath)
 	if err != nil {
 		logger.Errorf("Cant test Create(), err: %s", err)
 	}
 
 	_ = id
 
-	//err = repo.Delete(ctx, id)
-	//if err != nil {
-	//	logger.Errorf("Cant test Delete(), err: %s", err)
-	//
-	//}
+	all, err := bookRepo.FindAll(ctx)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	logger.Debugf("Authors is: %v", all)
 }
 
 func testMongoDB(ctx context.Context, mongo user.Repository, logger *logging.Logger) {

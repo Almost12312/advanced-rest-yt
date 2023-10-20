@@ -16,6 +16,13 @@ type repository struct {
 	logger *logging.Logger
 }
 
+func NewRepository(client postgresql.Client, logger *logging.Logger) author.Repository {
+	return &repository{
+		client: client,
+		logger: logger,
+	}
+}
+
 func (r *repository) Create(ctx context.Context, author *author.Author) (string, error) {
 	q := `
 		insert into public.author (name) 
@@ -99,11 +106,4 @@ func (r *repository) Delete(ctx context.Context, id string) error {
 	//row.
 
 	panic("implement me!")
-}
-
-func NewRepository(client postgresql.Client, logger *logging.Logger) author.Repository {
-	return &repository{
-		client: client,
-		logger: logger,
-	}
 }
