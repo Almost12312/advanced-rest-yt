@@ -4,7 +4,6 @@ import (
 	"advanced-rest-yt/internal/apperror"
 	"advanced-rest-yt/internal/http/handlers"
 	"advanced-rest-yt/pkg/logging"
-	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -19,12 +18,12 @@ const (
 var _ handlers.Handler = &handler{}
 
 type handler struct {
-	logger     *logging.Logger
-	repository Repository
+	logger  *logging.Logger
+	service *Service
 }
 
-func NewHandler(logger *logging.Logger, repository Repository) handlers.Handler {
-	return &handler{logger: logger, repository: repository}
+func NewHandler(logger *logging.Logger, service *Service) handlers.Handler {
+	return &handler{logger: logger, service: service}
 }
 
 func (h *handler) Register(r *httprouter.Router) {
@@ -34,7 +33,7 @@ func (h *handler) Register(r *httprouter.Router) {
 }
 
 func (h *handler) GetList(w http.ResponseWriter, r *http.Request) error {
-	all, err := h.repository.FindAll(context.TODO())
+	all, err := h.service.GetAll(r.Context())
 	if err != nil {
 		w.WriteHeader(400)
 		return nil
