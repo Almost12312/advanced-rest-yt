@@ -10,7 +10,7 @@ storage:
     port: 5432
     database: postgres
     username: postgres
-    password: we13
+    password: 1928 #we13
 
   mongodb:
     host: localhost

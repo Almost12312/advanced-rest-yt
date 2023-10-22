@@ -21,8 +21,8 @@ func NewRepository(client postgresql.Client, logger *logging.Logger) book.Reposi
 	}
 }
 
-func (r *repository) FindAll(ctx context.Context) (a []author.Author, err error) {
-	q := `select id, name from book;`
+func (r *repository) FindAll(ctx context.Context) (books []book.Book, err error) {
+	q := `select id, name, age from book;`
 
 	qFormat := formatQuery(q)
 
@@ -34,43 +34,48 @@ func (r *repository) FindAll(ctx context.Context) (a []author.Author, err error)
 	}
 
 	for rows.Next() {
-		var bk book.Book
-		err = rows.Scan(&bk.ID, &bk.Name)
+		var bk Book
+		err = rows.Scan(&bk.ID, &bk.Name, &bk.Age)
 		if err != nil {
 			return nil, err
 		}
 
 		subq := `
 		select a.name,
-       		author_id,
-       		book_id
-		from public.authors_books
-        join public.author a on a.id = authors_books.author_id
-		where book_id = $1;`
+       		a.id
+		from public.authors_books ab
+        join public.author a on a.id = ab.author_id
+		where ab.book_id = $1;`
 
-		authorsRows, err := r.client.Query(ctx, subq, "16a7fb15-6289-46c9-8738-863ea6292d6f")
+		//s := `-- select a.id, a.name from public.authors_books ab join public.author a on a.id = ab.author_id where book_id = $1`
+
+		authorsRows, err := r.client.Query(ctx, subq, bk.ID)
 		if err != nil {
 			return nil, err
 		}
 
+		authors := make([]author.Author, 0)
+
 		for authorsRows.Next() {
 			var auth author.Author
 
-			err := rows.Scan(&auth.ID, &auth.Name)
+			err := authorsRows.Scan(&auth.ID, &auth.Name)
 			if err != nil {
 				return nil, err
 			}
-			a = append(a, auth)
+			authors = append(authors, auth)
 		}
 
-		bk.Authors = a
+		bk.Authors = authors
+
+		books = append(books, bk.ToDomain())
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return a, nil
+	return books, nil
 }
 
 func formatQuery(q string) string {

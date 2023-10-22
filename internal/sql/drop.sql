@@ -1,2 +1,3 @@
-drop table if exists public.authors cascade;
-drop table if exists public.books cascade;
+drop table if exists public.author cascade;
+drop table if exists public.book cascade;
+drop table if exists public.authors_books cascade;

@@ -36,7 +36,7 @@ func (r *repository) Create(ctx context.Context, author *author.Author) (string,
 
 	if err := r.client.QueryRow(ctx, q, author.Name).Scan(&author.ID); err != nil {
 		var pgErr *pgconn.PgError
-		if errors.Is(err, pgErr) {
+		if errors.As(err, &pgErr) {
 			err = err.(*pgconn.PgError)
 			errMsg := fmt.Sprintf("sql error: %s. Code: %s, Detail: %s. Where: %s", pgErr.Message, pgErr.Code, pgErr.Detail, pgErr.Where)
 			r.logger.Error(errMsg)
