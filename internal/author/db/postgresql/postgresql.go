@@ -1,14 +1,18 @@
-package author
+package postgresql
 
 import (
-	"advanced-rest-yt/internal/author"
-	"advanced-rest-yt/pkg/client/postgresql"
-	"advanced-rest-yt/pkg/logging"
+	"advanced-rest-yt/internal/author/model"
+	"advanced-rest-yt/internal/author/storage"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgconn"
+	sq "github.com/Masterminds/squirrel"
 	"strings"
+
+	"advanced-rest-yt/pkg/client/postgresql"
+	"advanced-rest-yt/pkg/logging"
+
+	"github.com/jackc/pgconn"
 )
 
 type repository struct {
@@ -16,14 +20,14 @@ type repository struct {
 	logger *logging.Logger
 }
 
-func NewRepository(client postgresql.Client, logger *logging.Logger) author.Repository {
+func NewRepository(client postgresql.Client, logger *logging.Logger) storage.Repository {
 	return &repository{
 		client: client,
 		logger: logger,
 	}
 }
 
-func (r *repository) Create(ctx context.Context, author *author.Author) (string, error) {
+func (r *repository) Create(ctx context.Context, author *model.Author) (string, error) {
 	q := `
 		insert into public.author (name) 
 		values ($1) 
@@ -47,26 +51,35 @@ func (r *repository) Create(ctx context.Context, author *author.Author) (string,
 	return author.ID, nil
 }
 
-func (r *repository) FindAll(ctx context.Context) (a []author.Author, err error) {
-	q := `select id, name from author;`
+func (r *repository) FindAll(ctx context.Context, options storage.SortOptions) (a []model.Author, err error) {
+	q := sq.Select("id, name, age").From("public.author")
 
-	qFormat := formatQuery(q)
+	if options != nil {
+		q = q.OrderBy(options.GetOrderBy())
+	}
+
+	sql, i, err := q.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	qFormat := formatQuery(sql)
 
 	r.logger.Tracef("Sql query: %s", qFormat)
 
-	rows, err := r.client.Query(ctx, q)
+	rows, err := r.client.Query(ctx, sql, i...)
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
-		var ath author.Author
-		err = rows.Scan(&ath.ID, &ath.Name)
+		var ath Author
+		err = rows.Scan(&ath.ID, &ath.Name, &ath.Age)
 		if err != nil {
 			return nil, err
 		}
 
-		a = append(a, ath)
+		a = append(a, ath.ToDomain())
 	}
 
 	if err := rows.Err(); err != nil {
@@ -80,7 +93,7 @@ func formatQuery(q string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(q, "\t", ""), "\n", " ")
 }
 
-func (r *repository) FindOne(ctx context.Context, id string) (a author.Author, err error) {
+func (r *repository) FindOne(ctx context.Context, id string) (a model.Author, err error) {
 	q := `select id,name from public.author where id = $1;`
 
 	qFormat := formatQuery(q)
@@ -91,7 +104,7 @@ func (r *repository) FindOne(ctx context.Context, id string) (a author.Author, e
 	return a, nil
 }
 
-func (r *repository) Update(ctx context.Context, author author.Author) error {
+func (r *repository) Update(ctx context.Context, author model.Author) error {
 	//TODO implement me
 	panic("implement me")
 }

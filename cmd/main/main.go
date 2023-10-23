@@ -2,10 +2,14 @@ package main
 
 import (
 	"advanced-rest-yt/internal/author"
-	authRepo "advanced-rest-yt/internal/author/db"
+	authRepo "advanced-rest-yt/internal/author/db/postgresql"
+	"advanced-rest-yt/internal/author/model"
+	"advanced-rest-yt/internal/author/service"
+	"advanced-rest-yt/internal/author/storage"
 	bookDB "advanced-rest-yt/internal/book"
 	book "advanced-rest-yt/internal/book/db"
 	"advanced-rest-yt/internal/config"
+	"advanced-rest-yt/pkg/api/sort"
 	"advanced-rest-yt/pkg/client/postgresql"
 	"advanced-rest-yt/pkg/logging"
 	"advanced-rest-yt/pkg/strs"
@@ -67,22 +71,26 @@ func main() {
 
 	authRepository := authRepo.NewRepository(postgres, logger)
 	bookRepository := book.NewRepository(postgres, logger)
+	_ = bookRepository
 	//testMongoDB(ctx, mongo, logger)
-	testPostgreSQL(ctx, logger, authRepository, bookRepository)
+	//testPostgreSQL(ctx, logger, authRepository, bookRepository)
 
 	logger.Info("start creating handlers")
 	userHandler := user.NewHandler(logger)
 	userHandler.Register(router)
 
-	authorHandler := author.NewHandler(logger, authRepository)
+	authorService := service.NewService(authRepository, logger)
+	authorHandler := author.NewHandler(logger, authorService)
 	authorHandler.Register(router)
 	logger.Info("end creating handlers")
 
 	start(router, logger, cfg)
 }
 
-func testPostgreSQL(ctx context.Context, logger *logging.Logger, authRepo author.Repository, bookRepo bookDB.Repository) {
-	authors, err := authRepo.FindAll(ctx)
+func testPostgreSQL(ctx context.Context, logger *logging.Logger, authRepo storage.Repository, bookRepo bookDB.Repository) {
+	opt := storage.NewSortOptions("age", sort.ASC)
+
+	authors, err := authRepo.FindAll(ctx, opt)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
@@ -98,8 +106,8 @@ func testPostgreSQL(ctx context.Context, logger *logging.Logger, authRepo author
 
 	logger.Debugf("Author is: %s", a)
 
-	ath := &author.Author{
-		Name: strs.RandomString(int8(rand.Intn(127))),
+	ath := &model.Author{
+		Name: strs.RandomString(int8(rand.Intn(99))),
 	}
 
 	id, err := authRepo.Create(ctx, ath)

@@ -82,3 +82,28 @@ Content-Type: application/json
         client.assert(response.status === 200, "User delete is failure!")
     })
 %}
+
+###
+#authors fiter.
+# filer=operator:value
+GET http://localhost:1234/authors?age=lte:40
+Content-Type: application/json
+
+###
+
+#authors w/ sort
+# sort_by=filed, sort_order=asc
+GET http://localhost:1234/authors?sort_by=age&sort_order=desc
+Content-Type: application/json
+
+###
+
+#authors w/ pagination. Page 1
+GET http://localhost:1234/authors?limit=5
+Content-Type: application/json
+
+###
+
+#authors w/ pagination. Page 2
+GET http://localhost:1234/authors?limit=5&ptoken=token
+Content-Type: application/json

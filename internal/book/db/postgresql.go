@@ -1,7 +1,7 @@
 package book
 
 import (
-	"advanced-rest-yt/internal/author"
+	"advanced-rest-yt/internal/author/model"
 	"advanced-rest-yt/internal/book"
 	"advanced-rest-yt/pkg/client/postgresql"
 	"advanced-rest-yt/pkg/logging"
@@ -54,10 +54,10 @@ func (r *repository) FindAll(ctx context.Context) (books []book.Book, err error)
 			return nil, err
 		}
 
-		authors := make([]author.Author, 0)
+		authors := make([]model.Author, 0)
 
 		for authorsRows.Next() {
-			var auth author.Author
+			var auth model.Author
 
 			err := authorsRows.Scan(&auth.ID, &auth.Name)
 			if err != nil {
