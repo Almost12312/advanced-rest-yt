@@ -52,7 +52,7 @@ func (r *repository) Create(ctx context.Context, author *model.Author) (string, 
 }
 
 func (r *repository) FindAll(ctx context.Context, options storage.SortOptions) (a []model.Author, err error) {
-	q := sq.Select("id, name, age").From("public.author")
+	q := sq.Select("id, name, age, is_alive, created_at").From("public.author")
 
 	if options != nil {
 		q = q.OrderBy(options.GetOrderBy())
@@ -74,7 +74,7 @@ func (r *repository) FindAll(ctx context.Context, options storage.SortOptions) (
 
 	for rows.Next() {
 		var ath Author
-		err = rows.Scan(&ath.ID, &ath.Name, &ath.Age)
+		err = rows.Scan(&ath.ID, &ath.Name, &ath.Age, &ath.IsAlive, &ath.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

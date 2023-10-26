@@ -78,7 +78,7 @@ Content-Type: application/json
 
 {}
 > {%
-    client.test("List of users", () => {
+    client.test("List of authors", () => {
         client.assert(response.status === 200, "User delete is failure!")
     })
 %}

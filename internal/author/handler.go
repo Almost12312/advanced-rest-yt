@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -35,6 +37,39 @@ func (h *handler) Register(router *httprouter.Router) {
 }
 
 func (h *handler) GetList(w http.ResponseWriter, r *http.Request) error {
+	name := r.URL.Query().Get("name")
+	if name != "" {
+
+	}
+	age := r.URL.Query().Get("age")
+	if age != "" {
+		operator := "="
+		v := age
+		if index := strings.Index(age, ":"); index != -1 {
+			split := strings.Split(age, ":")
+			operator := split[0]
+			v = split[1]
+		}
+	}
+	isAlive := r.URL.Query().Get("is_alive")
+	if isAlive != "" {
+		_, err := strconv.ParseBool(isAlive)
+		if err != nil {
+			bad := apperror.BadRequest("filter params incorrect", "bool value wrong")
+			bad.WithFields(map[string]string{
+				"is_alive": "this value must be true or false",
+			})
+		}
+	}
+	createdAt := r.URL.Query().Get("created_at")
+	if createdAt != "" {
+		if strings.Index(createdAt, ":") {
+			// range
+		} else {
+			// single date
+		}
+	}
+
 	var sortOptions sort.Options
 	if options, ok := r.Context().Value(sort.OptionsContextKey).(sort.Options); ok {
 		sortOptions = options
