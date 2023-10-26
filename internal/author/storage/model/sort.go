@@ -1,12 +1,15 @@
-package storage
+package model
 
-import "fmt"
+import (
+	"advanced-rest-yt/internal/author/storage"
+	"fmt"
+)
 
 type sortOptions struct {
 	Field, Order string
 }
 
-func NewSortOptions(field, order string) SortOptions {
+func NewSortOptions(field, order string) storage.SortOptions {
 	return &sortOptions{
 		Field: field,
 		Order: order,

@@ -6,6 +6,7 @@ import (
 	"advanced-rest-yt/internal/author/model"
 	"advanced-rest-yt/internal/author/service"
 	"advanced-rest-yt/internal/author/storage"
+	model2 "advanced-rest-yt/internal/author/storage/model"
 	bookDB "advanced-rest-yt/internal/book"
 	book "advanced-rest-yt/internal/book/db"
 	"advanced-rest-yt/internal/config"
@@ -88,7 +89,7 @@ func main() {
 }
 
 func testPostgreSQL(ctx context.Context, logger *logging.Logger, authRepo storage.Repository, bookRepo bookDB.Repository) {
-	opt := storage.NewSortOptions("age", sort.ASC)
+	opt := model2.NewSortOptions("age", sort.ASC)
 
 	authors, err := authRepo.FindAll(ctx, opt)
 	if err != nil {

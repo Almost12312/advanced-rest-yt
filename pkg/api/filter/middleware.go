@@ -3,34 +3,33 @@ package filter
 import (
 	"context"
 	"net/http"
+	"strconv"
 )
 
 const (
-	ASC               = "ASC"
-	DESC              = "DESC"
-	OptionsContextKey = "sort_options"
+	OptionsContextKey = "filter_options"
 )
 
 func Middleware(handlerFunc http.HandlerFunc, defaultLimitField int) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		field := request.URL.Query().Get("limit")
+		limitQuery := request.URL.Query().Get("limit")
 
-		if field == "" {
-			field = defaultLimitField
+		limit := defaultLimitField
+		var limitErr error
+
+		if limitQuery != "" {
+			if limit, limitErr = strconv.Atoi(limitQuery); limitErr != nil {
+				writer.WriteHeader(http.StatusBadRequest)
+				writer.Write([]byte("bad request"))
+				return
+			}
 		}
 
-		opts := Options{
-			Field: field,
-			Order: order,
-		}
+		opts := NewOption(limit)
 
 		optCtx := context.WithValue(request.Context(), OptionsContextKey, opts)
 		request = request.WithContext(optCtx)
 
 		handlerFunc(writer, request)
 	}
-}
-
-type Options struct {
-	Field, Order string
 }
